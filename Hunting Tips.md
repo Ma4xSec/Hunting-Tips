@@ -1,9 +1,8 @@
 ![Color_MAX](https://user-images.githubusercontent.com/55370554/76710262-b7dae300-670e-11ea-88e0-e1d95fc353ab.jpg)
 
-
-## **Note : These tips collected from many resources (Facebook , Twitter , Meduim , Portswigger...etc.) and some scenarios that I have seen while hunting**.
-
-1. jwt decoder --> [jwt.io](https://jwt.io/#debugger-io) </br>
+## **Note : Those tips collected from many resources (Facebook , Twitter , Meduim , Portswigger...etc.) and some scenarios that I have seen while hunting.Sorry, I don't put the names of the writer of these tips because they are so many, but they are very much appreciated**.
+                            **Try the imposssible, that’s the only way amazing things happen**
+1. [jwt decoder](https://jwt.io/#debugger-io) </br>
 
 2. Some useful ways of breaking out of a string literal are
   * '-alert(document.domain)-'
@@ -114,4 +113,202 @@ DB and storage permissions.
 (the file contains special  character) --> Easy xss
 
 34. If the **GET & POST** methods are only allowed so we can use **X-HTTP-Method-Override** with PUT method leads to RCE.
- 
+
+35. Always create two accounts and see if you can get the objects of the other account by changing out the id parameters from account 1 with those from account 2 while using the same session cookie as account 1 **IDOR**
+
+36.  If you find an application where some type of PIN is using to unlock the app or verify identity and if that request can't be captured by proxy then it's possible that application is storing pin internally. Find that file and delete or edit to bypass PIN protection.
+
+37. If you found apk file  on the server download it and change the extention to .zip and extract it. Read the source files maybe you find several hidden endpoints
+
+38. Some CSRF tips
+- change single character
+- send empty value of token
+- clickjaking
+- remove it from the requests
+- use another user's valid token
+- Csrf protection by Referer header ? Remove the header , Add in form *<meta name="Referer" content="no-reference">*
+- try to decrypt hash (maybe CSRF token is a hash)
+- Analyze Token (with burp)
+- Sometimes Anti-CSRF token is composed of two parts, one of them remains static while the other one dynamic.          "837456mzy29jkd911139" for one request the other time "837456mzy29jkd337221" if you notice, "837456mzy29jkd" part of the token   remain same, send the request with only the static part.
+- Sometimes anti-csrf check is dependent on User-Agent as well. If you try to use mobile/tablet user agent, application may not even check for anti-csrf token
+- try change csrf token value to true or 1 maybe will working
+- try create new account maybe csrf token same for all account try harder
+
+39. Some web sites are tolerant of alternate HTTP request methods when performing an action so try other methods !!
+
+40. However, the response containing a redirect might still include some sensitive data .
+
+41. IDORs Tips:
+- Don’t ignore encoded and hashed IDs try to decoding or cracking
+- Try creating a few accounts to analyze how these IDs are created. You might be able to find a pattern that will allow you to     predict IDs belonging to other users
+-  it might be possible to leak random or hashed IDs via another API endpoint, on other public pages in the application (profile page of other users, etc), or in a URL via referer
+- Offer the application an ID, even if it doesn’t ask for it, If no IDs are used in the application generated request, try adding it to the request. Try appending id, user_id, message_id or other object reference params and see if it makes a difference to the application’s behavior.
+> GET /api_v1/messages --> GET /api_v1/messages?user_id=ANOTHER_USERS_ID
+- HPP (HTTP parameter pollution): supplying multiple values for the same parameter can also lead to IDOR. Applications might not anticipate the user submitting multiple values for the same parameter and by doing so, you might be able to bypass the access control set forth on the endpoint.
+> GET /api_v1/messages?user_id=ANOTHER_USERS_ID
+
+to
+>GET /api_v1/messages?user_id=YOUR_USER_ID&user_id=ANOTHER_USERS_ID
+
+or
+> GET /api_v1/messages?user_ids[]=YOUR_USER_ID&user_ids[]=ANOTHER_USERS_ID
+
+- Sometimes, switching around the file type of the requested file may lead to the server processing authorization differently. For example, try adding .json to the end of the request URL and see what happens.
+
+
+
+42. While hunting on a Node js target always pass '%ff' as URL like https://target.com/%ff, Most times it causes an error that leaks full path of the site and some bb programs accept it as a valid issue.
+
+43. For example an application might configure rules like the following:
+DENY: POST, /admin/deleteUser, managers 
+This rule denies access to the POST method on the URL /admin/deleteUser, for users in the managers group. Maybe we can bypass it using some non-standard headers like 
+> X-Original-URL and X-Rewrite-URL Example:
+
+might be possible to bypass the access controls using a request like the following:
+
+> POST / HTTP/1.1 </br>
+X-Original-URL: /admin/deleteUser
+
+44. IDORs are everywhere don't focus only on parameters try to change anything like :
+> /downloads/2.txt (set 2.txt to 1.txt)
+
+> /Private-Posts/1234 (set 1234 to 4567)
+
+You can try everywhere dude !!
+
+45. I will explain what i mean with example , If i want to update my password mybe i will go through 3 steps to update it 
+- load the current info (username,password,email).
+- Submit changes.
+- Review the changes and confirm. 
+
+Sometimes, a web site will implement rigorous access controls over some of these steps, but ignore others
+suppose access controls are correctly applied to the first and second steps, but not to the third step. Effectively, the web site assumes that a user will only reach step 3 if they have already completed the first steps, which are properly controlled. Here, an attacker can gain unauthorized access to the function by skipping the first two steps and directly submitting the request for the third step with the required parameters
+
+46. Check the errors source code man !
+
+47. In APIs the difference between a PUT and a POST request is that put overwrites whatever is there previously
+
+48. When you get 403 status code try to brute force dirs & files
+
+49. I don't know if this tip working always but when you get 403 and you brute force and for example if you got directory "max" so the url will look like https://www.example.com/max the tip here is to try to put slash after the name of directory so it will look like this  https://www.example.com/max/ 
+> the link that i got this tip from </br>
+https://medium.com/@mehedi1194/how-i-get-my-first-swag-from-sidn-sensitive-data-expose-fc8e202fef85
+
+50. Host Header Tips:
+ - change host header to any value maybe it will redirect you to the local host if it's the first virtual host in the server configration file
+ - try to inject the Host Header with values like 
+ > - dev.example.com </br>
+ >  - stage.example.com </br>
+ >  - test.example.com </br>
+   
+ - you can try to inject the host header with some values manually 
+  > - dev </br>
+  > - stage </br>
+  > - test </br>
+  > - localhost </br>
+  > - staging </br> 
+  > - development </br>
+  > - secure </br>
+  > - uat </br>
+  > - status </br>
+
+or you can use [virtual host discovry](https://github.com/jobertabma/virtual-host-discovery) to automate the proccess 
+
+- try xss on the host header (low impact)
+- try host header injection in reset password (high impact)
+
+51. Race condition bugs are mostly on those endpoints which deal with adding/removing/changing of a particular resource .
+
+52. If you find a website with a login page without a registration feature, try to bruteforce it using dirsearch, dirbuster, etc. Websites that only display a login page and no registration feature indicate that the website can only be accessed by an internal team, and usually such websites have lots of bugs.
+
+53. Try **X-Forwarded-Host** or **X-Host** headers in host header attacks (reset password,etc..)
+
+54. try blind SSRF in the **Referer** header 
+
+55. Try to put link after the url like **https://www.example.com/www.evil.com** maybe it will get the content of evil.com and it will be SSRF or will redirect you to evil.com and it will Open redirection (found it 2 times as SSRF)
+
+56. Try arrays with the json data  for example reset password 
+>  {"Email":"max@yahoo.com"} so you can try to set it to {"Email":["evil@yahoo.com","max@yahoo.com"]} 
+
+happend with me and i got 2 emails on evil@yahoo.com and max@yahoo.com and it was nice trick 
+
+57. Some Path Traversal & LFI Tips:
+- if the server checks for some path like **/var/www/html**
+> https://www.example.com?path=/var/www/html/photo.png
+
+so we can try
+> https://www.example.com?path=/var/www/html/../../../etc/passwd
+
+- If the server checks for extention like .png we can use null byte 
+>  https://www.example.com?path=shell.php%00.png
+
+- try // and \/
+- try ....//
+- try  non-standard encoding like
+> ..%c0%af..%c0%af..%c0%afetc/passwd </br>
+or double encoding </br>
+..%252f..%252f..%252fetc/passwd
+
+- If you're playing with windows server you can use ../ or ..\ 
+
+
+58. I'll tell you small tip it will help you reduce potential cases to search for JWT on  
+>  JWT are used for Authorization not for Authentication.
+
+59. API Penetration Testing Tools,Tips,Guides,Checklists and Tutorials :-
+
+- [beginners guide restful api part 1](https://payatu.com/beginners-guide-restful-api-vapt-part-1/)
+- [beginners guide restful api part 2](https://payatu.com/beginners-guide-restful-api-vapt-part-2/)
+- [authentication schemes rest api](https://payatu.com/authentication-schemes-rest-api/)
+- [9 Types of Tests To Perform On Your APIs](https://nordicapis.com/9-types-of-tests-to-perform-on-your/)
+- [Api Testing](https://www.guru99.com/api-testing.html)
+- [Testing rest api manually](https://www.guru99.com/testing-rest-api-manually.html)
+- [https://blog.securelayer7.net/web-services-api-penetration-testing-part-1/](https://blog.securelayer7.net/web-services-api-penetration-testing-part-1/)
+- [Web Services and API Penetration Testing Part #2](https://blog.securelayer7.net/web-services-api-penetration-testing-part-2/)
+- [API Security Testing : Rules And Checklist](https://www.testbytes.net/blog/api-security-testing-rules-and-checklist/)
+- [https://www.qasymphony.com/blog/automated-api-testing-tutorial/](https://www.qasymphony.com/blog/automated-api-testing-tutorial/)
+- [API Security Checklist](https://github.com/shieldfy/API-Security-Checklist)
+[API Security Testing – How to Hack an API and Get Away with It (Part 1 of 3)](https://smartbear.com/blog/test-and-monitor/api-security-testing-how-to-hack-an-api-part-1/)
+[API Security Testing – How to Hack an API and Get Away with It (Part 2 of 3)](https://smartbear.com/blog/test-and-monitor/api-security-testing-how-to-hack-an-api-part-2/)
+- [API Security Testing – How to Hack an API and Get Away with It (Part 3 of 3)](https://smartbear.com/blog/test-and-monitor/api-security-testing-how-to-hack-an-api-part-3/)
+- [Hack Your API First – learn how to identify vulnerabilities in today’s internet connected devices with Pluralsight](https://www.troyhunt.com/hack-your-api-first-learn-how-to/)
+- [Exploiting Api’s with Postman and Google Chrome](https://medium.com/bugbountywriteup/exploiting-apis-with-postman-and-google-chrome-ade13ce74e2b)
+- [API security testing - tips to prevent getting pwned](https://assertible.com/blog/api-security-testing-tips-to-prevent-getting-pwned)
+- [API Testing Tutorial – Quick Guide on the Basics](https://reqtest.com/testing-blog/api-testing-tutorial/)
+- [Astra](https://github.com/flipkart-incubator/Astra)
+- [ Susanoo is REST API security testing framework](https://github.com/ant4g0nist/Susanoo)
+- [syntribos is a python API security testing too](https://github.com/openstack/syntribos)
+- [Fuzzapi is a tool used for REST API pentesting](https://github.com/Fuzzapi/fuzzapi)
+- [The DevSecOps toolset for REST APIs](https://github.com/BBVA/apitest)
+- [20 Best API Testing Tools in 2020: REST & SOAP Web Services ](https://www.guru99.com/top-6-api-testing-tool.html)
+- [REST Assured: Penetration Testing REST APIs Using Burp Suite: Part 1 – Introduction & Configuration](https://www.mindpointgroup.com/blog/cyber-security/rest-assured-penetration-testing-rest-apis-using-burp-suite-part-1-introduction-configuration/)
+- [REST Assured: Penetration Testing REST APIs Using Burp Suite: Part 2 – Testing
+by Kory Ponting](https://www.mindpointgroup.com/blog/cyber-security/rest-assured-penetration-testing-rest-apis-using-burp-suite-part-2-testing/)
+- [REST Assured: Penetration Testing REST APIs Using Burp Suite: Part 3 – Reporting](https://www.mindpointgroup.com/blog/rest-assured-penetration-testing-rest-apis-using-burp-suite-part-3-reporting/)
+- [Simplifying API Pentesting With Swagger Files](https://rhinosecuritylabs.com/application-security/simplifying-api-pentesting-swagger-files/)
+
+60. Try to encode character of the parameter maybe it will bypass the WAF
+> ?page='-alert()-'  to    ?pa%67e='-alert()-'
+
+you can encode characters manully from here [ASCII Encoding Reference-W3Schools](https://www.w3schools.com/tags/ref_urlencode.ASP)
+
+61. To bypass Rate Limit try to add random parameter on the last endpoint
+>  https://blabla.com/page1/page2?bypass
+
+
+62.If you wanna use amass faster you can use it on the passive mode 
+> amass enum -d blabla.com -passive 
+
+63. Recon tool for github to search for sensitive info [gitrob](https://github.com/michenriksen/gitrob)
+
+64. You can use ffuf to bruteforce s3 bucket 
+> ffuf -u http://FUZZ.company.s3.amazonaws.com -w bucket.txt
+
+
+ـــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ
+
+If you have any improvments feel free to drop them [MrMax](https://twitter.com/MrMax404).
+
+
+
+
